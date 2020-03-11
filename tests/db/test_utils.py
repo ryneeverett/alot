@@ -721,6 +721,8 @@ class TestExtractBodyPart(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
+    @mock.patch('alot.db.utils.settings.mailcap_find_match',
+                mock.Mock(return_value=(None, None)))
     def test_simple_utf8_file(self):
         mail = email.message_from_binary_file(
                 open('tests/static/mail/utf8.eml', 'rb'),
@@ -728,6 +730,20 @@ class TestExtractBodyPart(unittest.TestCase):
         body_part = utils.get_body_part(mail)
         actual = utils.extract_body_part(body_part)
         expected = "Liebe Grüße!\n"
+
+        self.assertEqual(actual, expected)
+
+    @mock.patch('alot.db.utils.settings.get', mock.Mock(return_value=True))
+    @mock.patch('alot.db.utils.settings.mailcap_find_match',
+                mock.Mock(return_value=(
+                    None, {'view': 'sed "s/ is/ was/"'})))
+    def test_plaintext_mailcap(self):
+        expected = 'This was an email\n'
+        mail = EmailMessage()
+        set_basic_headers(mail)
+        mail.set_content('This is an email')
+        body_part = utils.get_body_part(mail)
+        actual = utils.extract_body_part(body_part)
 
         self.assertEqual(actual, expected)
 
