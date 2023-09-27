@@ -256,6 +256,8 @@ class ExternalCommand(Command):
 
         logging.info('calling external command: %s', self.cmdlist)
 
+        err = None
+        proc = None
         ret = ''
         # TODO: these can probably be refactored in terms of helper.call_cmd
         # and helper.call_cmd_async
@@ -307,7 +309,7 @@ class ExternalCommand(Command):
         else:
             msg = (
                 "external command has exited with error code {} -- {}".format(
-                    proc.returncode,
+                    "None" if proc is None else proc.returncode,
                     ret or "No stderr output"))
             ui.notify(msg, priority='error')
         if self.refocus and callerbuffer in ui.buffers:
